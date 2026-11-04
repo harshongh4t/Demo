@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumos eDRF Deploy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single night sky. A light beam (the "Lumos" spell) travels the deployment path; each section is lit as the flow reaches it. Deliberately dark-only. */
+:root{
+  --night:#0a0e1c;
+  --night-2:#111733;
+  --line:#253056;
+  --ink:#e9edf9;
+  --muted:#93a0c4;
+  --lumen:#ffd27a;
+  --lumen-deep:#f2a93b;
+  --frost:#86dcff;
+  --ok:#8ee6b4;
+  --warn:#ffb08a;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lumen);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--lumen)}
+h2{font-family:var(--f-display);font-weight:500;font-size:clamp(1.9rem,4.2vw,3rem);line-height:1.08;letter-spacing:-.02em;margin:.35em 0 .4em;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:500;font-size:1.3rem;line-height:1.2;margin:0;text-wrap:balance}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch;font-size:1.06rem}
+section{padding-block:clamp(56px,9vw,110px)}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+
+/* ---------- hero ---------- */
+.hero{position:relative;isolation:isolate;overflow:hidden;padding-block:clamp(56px,10vw,120px) clamp(48px,7vw,80px);border-bottom:1px solid var(--line)}
+#motes{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.hero::after{content:"";position:absolute;z-index:-1;left:50%;top:-30%;width:min(1100px,140vw);aspect-ratio:1;transform:translateX(-50%);
+  background:radial-gradient(closest-side,color-mix(in oklab,var(--lumen) 22%,transparent),transparent 70%);pointer-events:none}
+.hero-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.team{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.team i{width:9px;height:9px;border-radius:50%;background:var(--lumen);box-shadow:0 0 14px 4px color-mix(in oklab,var(--lumen) 60%,transparent);animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45;box-shadow:0 0 4px 1px color-mix(in oklab,var(--lumen) 40%,transparent)}}
+.build{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.spell{font-family:var(--f-display);font-weight:800;font-size:clamp(5rem,19vw,14.5rem);line-height:.86;letter-spacing:-.055em;margin:.18em 0 .08em;
+  background:linear-gradient(100deg,#3a4677 0%,#3a4677 35%,var(--lumen) 47%,#fff6dd 50%,var(--lumen) 53%,#3a4677 65%,#3a4677 100%);
+  background-size:300% 100%;background-position:0% 0;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:sweep 5.5s cubic-bezier(.6,.1,.3,1) .3s 1 forwards}
+@keyframes sweep{to{background-position:100% 0}}
+.spell-done{background:linear-gradient(180deg,#fff3d4,var(--lumen) 55%,var(--lumen-deep));-webkit-background-clip:text;background-clip:text;animation:none}
+.hero h1{font-family:var(--f-display);font-weight:300;font-size:clamp(1.45rem,3.4vw,2.4rem);line-height:1.18;letter-spacing:-.01em;margin:0;max-width:24ch;text-wrap:balance}
+.hero h1 b{font-weight:500;color:var(--lumen)}
+.hero .lede{margin-top:18px}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:999px;font-weight:600;font-size:.95rem;text-decoration:none;border:1px solid var(--line);background:color-mix(in oklab,var(--night-2) 80%,transparent);color:var(--ink);cursor:pointer;font-family:var(--f-body);transition:border-color .2s,transform .2s,background .2s}
+.btn:hover{border-color:var(--lumen);transform:translateY(-1px)}
+.btn.primary{background:var(--lumen);color:#1b1407;border-color:var(--lumen)}
+.btn.primary:hover{background:#ffe0a1}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* ---------- path diagram ---------- */
+.path-box{margin-top:34px;overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--night-2),var(--night))}
+.path-box svg{display:block;min-width:820px;width:100%;height:auto}
+.path-legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;color:var(--muted);font-size:.88rem}
+.path-legend span{display:inline-flex;align-items:center;gap:8px}
+.path-legend i{width:22px;height:2px;background:var(--lumen);box-shadow:0 0 8px var(--lumen)}
+.path-legend i.cool{background:var(--frost);box-shadow:0 0 8px var(--frost)}
+
+/* ---------- change note ---------- */
+.shift{display:grid;grid-template-columns:minmax(0,640px);gap:18px;align-items:stretch;margin-top:30px}
+.shift > div{min-width:0;border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:var(--night-2)}
+.shift .then{opacity:.75}
+.shift .now{border-color:color-mix(in oklab,var(--lumen) 55%,var(--line));box-shadow:0 0 40px -12px color-mix(in oklab,var(--lumen) 45%,transparent)}
+.shift .tag{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.shift .now .tag{color:var(--lumen)}
+.shift pre{margin:12px 0 0;font-family:var(--f-mono);font-size:.82rem;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.shift .then pre{text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--warn) 70%,transparent)}
+.shift .arrow{display:grid;place-items:center;color:var(--lumen);font-family:var(--f-display);font-size:2rem}
+@media (max-width:760px){.shift{grid-template-columns:1fr}.shift .arrow{transform:rotate(90deg)}}
+
+/* ---------- walkthrough ---------- */
+.walk-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--night-2)}
+.seg button{all:unset;cursor:pointer;padding:7px 14px;border-radius:999px;font-size:.85rem;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--night)}
+.seg button:focus-visible{outline:2px solid var(--lumen)}
+.walk{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:26px;margin-top:30px;align-items:start}
+@media (max-width:900px){.walk{grid-template-columns:minmax(0,1fr)}}
+.steps{list-style:none;margin:0;padding:0;position:relative;display:grid;gap:4px}
+.steps::before{content:"";position:absolute;left:19px;top:14px;bottom:14px;width:2px;background:var(--line)}
+.steps .beam{position:absolute;left:19px;top:14px;width:2px;background:linear-gradient(var(--lumen),var(--lumen-deep));box-shadow:0 0 12px var(--lumen);transition:height .6s cubic-bezier(.5,0,.2,1);height:0}
+.step-btn{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px 10px 0;border-radius:12px;position:relative}
+.step-btn:focus-visible{outline:2px solid var(--lumen)}
+.step-btn .dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:.82rem;background:var(--night);border:2px solid var(--line);color:var(--muted);position:relative;z-index:1;transition:all .3s}
+.step-btn .t{font-weight:600;line-height:1.3;padding-top:2px}
+.step-btn .w{display:block;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.step-btn:hover .t{color:var(--lumen)}
+.step-btn.lit .dot{border-color:var(--lumen-deep);color:var(--lumen)}
+.step-btn.on .dot{background:var(--lumen);border-color:var(--lumen);color:#1b1407;box-shadow:0 0 22px 2px color-mix(in oklab,var(--lumen) 55%,transparent)}
+.step-btn.on{background:color-mix(in oklab,var(--night-2) 85%,transparent)}
+
+.stage{min-width:0;display:grid;gap:16px}
+.stage-info{border:1px solid var(--line);border-radius:18px;padding:22px 24px;background:var(--night-2)}
+.stage-info .where{display:inline-flex;gap:8px;align-items:center;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--frost)}
+.stage-info h3{font-size:1.65rem;margin-top:8px}
+.stage-info p{color:var(--muted);margin-top:8px;max-width:64ch}
+.tip{margin-top:14px;display:flex;gap:10px;font-size:.92rem;color:var(--ink);border-top:1px dashed var(--line);padding-top:14px}
+.tip b{color:var(--lumen);font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;padding-top:3px;flex:none}
+
+.term{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#060914;box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.02) inset}
+.term-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);background:#0c1124}
+.term-bar i{width:11px;height:11px;border-radius:50%;background:var(--line)}
+.term-bar i:first-child{background:#f0796b}.term-bar i:nth-child(2){background:#f5c46a}.term-bar i:nth-child(3){background:#6fd39a}
+.term-bar span{margin-left:10px;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term pre{margin:0;padding:18px 20px 22px;font-family:var(--f-mono);font-size:.84rem;line-height:1.7;overflow-x:auto;min-height:330px;white-space:pre;color:var(--muted)}
+.term .c{color:var(--ink)}
+.term .p{color:var(--lumen);user-select:none}
+.term .ok{color:var(--ok)}
+.term .w{color:var(--warn)}
+.term .ui{color:var(--frost)}
+.term .cm{color:#5c6890}
+.caret{display:inline-block;width:.6em;height:1.1em;background:var(--lumen);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.term-foot{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.term-foot small{color:var(--muted);font-size:.82rem}
+.nav{display:flex;gap:8px}
+.nav .btn{padding:9px 16px;font-size:.88rem}
+
+/* ---------- cluster ---------- */
+.cluster{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:1px;margin-top:30px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.cluster div{background:var(--night);padding:22px;min-width:0}
+.cluster .k{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cluster code{display:block;color:var(--frost);margin:8px 0 6px;font-size:.92rem;word-break:break-all}
+.cluster p{color:var(--muted);font-size:.92rem}
+
+/* ---------- pitfalls ---------- */
+.traps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;margin-top:30px}
+.trap{border-top:2px solid var(--warn);padding-top:16px;min-width:0}
+.trap .sym{font-family:var(--f-mono);font-size:.84rem;color:var(--warn);word-break:break-word}
+.trap h3{margin-top:10px}
+.trap p{color:var(--muted);margin-top:8px;font-size:.95rem}
+
+/* ---------- skill ---------- */
+.skill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center}
+@media (max-width:900px){.skill{grid-template-columns:minmax(0,1fr)}}
+.chat{border:1px solid var(--line);border-radius:20px;background:var(--night-2);padding:20px;display:grid;gap:14px}
+.bub{border-radius:14px;padding:12px 16px;font-size:.93rem;max-width:92%}
+.bub.me{justify-self:end;background:color-mix(in oklab,var(--lumen) 16%,var(--night));border:1px solid color-mix(in oklab,var(--lumen) 35%,transparent)}
+.bub.me code{color:var(--lumen)}
+.bub.ai{background:var(--night);border:1px solid var(--line)}
+.bub.ai ol{margin:8px 0 0;padding-left:20px;color:var(--muted)}
+.bub.ai li{margin:3px 0}
+.bub .who{display:block;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.repo{margin-top:26px;display:grid;gap:10px}
+.repo-link{display:flex;gap:14px;align-items:center;padding:16px 18px;border:1px solid var(--line);border-radius:16px;text-decoration:none;background:var(--night-2);transition:border-color .2s}
+.repo-link:hover{border-color:var(--lumen)}
+.repo-link svg{width:30px;height:30px;flex:none;color:var(--ink)}
+.repo-link span{min-width:0}
+.repo-link b{display:block}
+.repo-link small{display:block;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);word-break:break-all}
+.clone{display:flex;gap:10px;align-items:center;border:1px dashed var(--line);border-radius:12px;padding:10px 12px}
+.clone code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;color:var(--ink)}
+.copy{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:.75rem;color:var(--lumen);padding:4px 8px;border:1px solid var(--line);border-radius:8px}
+.copy:focus-visible{outline:2px solid var(--lumen)}
+
+/* ---------- video ---------- */
+.screen{display:block;position:relative;margin-top:30px;border-radius:22px;overflow:hidden;border:1px solid var(--line);text-decoration:none;aspect-ratio:16/7;max-width:100%;
+  background:radial-gradient(60% 90% at 50% 110%,color-mix(in oklab,var(--lumen) 28%,transparent),transparent 70%),repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.018) 3px 4px),var(--night-2)}
+@media (max-width:600px){.screen{aspect-ratio:4/3}}
+.screen .inner{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:16px;text-align:center;padding:20px}
+.play{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:var(--lumen);color:#1b1407;box-shadow:0 0 0 12px color-mix(in oklab,var(--lumen) 16%,transparent),0 0 60px 10px color-mix(in oklab,var(--lumen) 40%,transparent);transition:transform .3s}
+.screen:hover .play{transform:scale(1.07)}
+.play svg{width:30px;height:30px;margin-left:5px}
+.screen .vt{font-family:var(--f-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:500}
+.screen small{color:var(--muted);font-family:var(--f-mono);font-size:.78rem}
+
+footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-area-inset-bottom, 0px))}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.9rem}
+.foot .sig{font-family:var(--f-display);font-weight:800;font-size:1.6rem;letter-spacing:-.03em;color:var(--lumen)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .spell{background:linear-gradient(180deg,#fff3d4,var(--lumen) 55%,var(--lumen-deep));-webkit-background-clip:text;background-clip:text}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="motes" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="hero-top">
+      <span class="team"><i></i>Team Lumos presents</span>
+      <span class="build">Demo recorded on RTQA build 50.99.0.150</span>
+    </div>
+    <div class="spell" id="spell" aria-hidden="true">Lumos</div>
+    <h1>Lighting up <b>Trellix eDRF XClient</b> on every OpenShift node.</h1>
+    <p class="lede">One bundle, one secret, one script. This is the deployment flow from an empty jumpbox to a container-security agent running on each worker node and reporting to ePO, plus the Claude Code skill that walks first-timers through it.</p>
+    <div class="ctas">
+      <a class="btn primary" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Watch the recorded demo</a>
+      <a class="btn" href="#walkthrough"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 17l6-6-6-6M12 19h8"/></svg>Step through the flow</a>
+      <a class="btn" href="https://github.com/harshongh4t/edrf-xclient-deploy/blob/main/.claude/skills/edrf-xclient-deploy/SKILL.md" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>The skill on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="path">
+  <div class="wrap">
+    <span class="eyebrow">The path of light</span>
+    <h2>Five stops between a tarball and a protected node</h2>
+    <p class="lede">Everything starts on the jumpbox. ePO supplies the connection details, <code>deploy.sh</code> hands them to Helm, and the DaemonSet places one agent pod on every worker. Those agents then check in with the same ePO server.</p>
+    <div class="path-box">
+      <svg viewBox="0 0 1000 300" role="img" aria-label="Flow: Jumpbox, ePO console, epo-coninfo secret, deploy.sh with Helm, OpenShift worker nodes, which report back to ePO">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#ffd27a" stop-opacity=".15"/><stop offset=".5" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#86dcff" stop-opacity=".7"/></linearGradient>
+        </defs>
+        <path id="flow" d="M90 170 H910" stroke="url(#beam)" stroke-width="2" fill="none"/>
+        <path id="back" d="M910 150 C 860 30, 340 30, 290 150" stroke="#86dcff" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="5 7" fill="none"/>
+        <text x="600" y="52" text-anchor="middle" fill="#86dcff" font-family="IBM Plex Mono, monospace" font-size="13">agents check in with ePO</text>
+        <circle r="6" fill="#fff4d6" filter="url(#glow)"><animateMotion dur="5s" repeatCount="indefinite"><mpath href="#flow"/></animateMotion></circle>
+        <circle r="4" fill="#ffd27a" filter="url(#glow)" opacity=".7"><animateMotion dur="5s" begin="1.2s" repeatCount="indefinite"><mpath href="#flow"/></animateMotion></circle>
+        <circle r="4.5" fill="#86dcff" filter="url(#glow)"><animateMotion dur="4s" begin="2.5s" repeatCount="indefinite"><mpath href="#back"/></animateMotion></circle>
+        <g font-family="IBM Plex Sans, sans-serif" text-anchor="middle">
+          <g transform="translate(90 170)"><circle r="26" fill="#0a0e1c" stroke="#ffd27a" stroke-width="2"/><text y="5" fill="#ffd27a" font-family="IBM Plex Mono, monospace" font-size="13">$_</text>
+            <text y="58" fill="#e9edf9" font-size="16" font-weight="600">Jumpbox</text><text y="80" fill="#93a0c4" font-size="12.5">oc · helm · Git Bash</text></g>
+          <g transform="translate(290 170)"><circle r="26" fill="#0a0e1c" stroke="#ffd27a" stroke-width="2"/><text y="5" fill="#ffd27a" font-family="IBM Plex Mono, monospace" font-size="12">ePO</text>
+            <text y="58" fill="#e9edf9" font-size="16" font-weight="600">ePO console</text><text y="80" fill="#93a0c4" font-size="12.5">TrellixSmartInstall.sh</text></g>
+          <g transform="translate(500 170)"><circle r="26" fill="#0a0e1c" stroke="#ffd27a" stroke-width="2"/><text y="5" fill="#ffd27a" font-family="IBM Plex Mono, monospace" font-size="12">xml</text>
+            <text y="58" fill="#e9edf9" font-size="16" font-weight="600">epo-coninfo Secret</text><text y="80" fill="#93a0c4" font-size="12.5">coninfo.xml, via extract-coninfo.sh</text></g>
+          <g transform="translate(710 170)"><circle r="26" fill="#0a0e1c" stroke="#ffd27a" stroke-width="2"/><text y="5" fill="#ffd27a" font-family="IBM Plex Mono, monospace" font-size="12">.sh</text>
+            <text y="58" fill="#e9edf9" font-size="16" font-weight="600">deploy.sh</text><text y="80" fill="#93a0c4" font-size="12.5">helm upgrade --install</text></g>
+          <g transform="translate(910 170)"><circle r="30" fill="#0a0e1c" stroke="#86dcff" stroke-width="2"/>
+            <rect x="-14" y="-12" width="9" height="9" rx="2" fill="#86dcff"/><rect x="-2" y="-12" width="9" height="9" rx="2" fill="#86dcff" opacity=".7"/><rect x="-14" y="0" width="9" height="9" rx="2" fill="#86dcff" opacity=".7"/><rect x="-2" y="0" width="9" height="9" rx="2" fill="#86dcff"/><rect x="10" y="-6" width="5" height="9" rx="1.5" fill="#86dcff" opacity=".45"/>
+            <text y="62" fill="#e9edf9" font-size="16" font-weight="600">Worker nodes</text><text y="84" fill="#93a0c4" font-size="12.5">one agent pod per node</text></g>
+        </g>
+      </svg>
+    </div>
+    <div class="path-legend"><span><i></i>Deployment flow, run by you</span><span><i class="cool"></i>Agents reporting back, automatic</span></div>
+
+    <div class="shift" aria-label="Build 50.99.0.150 commands">
+      <div class="now"><span class="tag">Build 50.99.0.150</span>
+        <pre>bash extract-coninfo.sh TrellixSmartInstall.sh &lt;namespace&gt;
+oc apply -f epo-coninfo.yml
+./deploy.sh   # no ePO flags, reads the secret</pre></div>
+    </div>
+  </div>
+</section>
+
+<section id="walkthrough" style="background:linear-gradient(180deg,transparent,color-mix(in oklab,var(--night-2) 70%,transparent) 30%,transparent)">
+  <div class="wrap">
+    <div class="walk-head">
+      <div>
+        <span class="eyebrow">Live walkthrough</span>
+        <h2>Eight steps, in the order you run them</h2>
+        <p class="lede">Pick a step, or press Play to run the demo end to end. Values in <code>&lt;angle brackets&gt;</code> are placeholders; pod names and sizes are examples.</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Jumpbox operating system">
+          <button type="button" id="os-linux" aria-pressed="true">Linux</button>
+          <button type="button" id="os-win" aria-pressed="false">Windows cmd</button>
+        </div>
+        <button type="button" class="btn primary" id="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Play the demo</span></button>
+      </div>
+    </div>
+
+    <div class="walk">
+      <ol class="steps" id="steps"><span class="beam" id="beam" aria-hidden="true"></span></ol>
+      <div class="stage">
+        <div class="stage-info" aria-live="polite">
+          <span class="where" id="s-where"></span>
+          <h3 id="s-title"></h3>
+          <p id="s-why"></p>
+          <div class="tip"><b>Watch for</b><span id="s-tip"></span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar"><i></i><i></i><i></i><span id="t-title">bash</span></div>
+          <pre id="term" tabindex="0" aria-label="Terminal output for the selected step"></pre>
+        </div>
+        <div class="term-foot">
+          <small id="t-count">Step 1 of 8</small>
+          <div class="nav">
+            <button type="button" class="btn" id="prev">Previous</button>
+            <button type="button" class="btn" id="next">Next step</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cluster">
+  <div class="wrap">
+    <span class="eyebrow">What lands on the cluster</span>
+    <h2>Everything one script puts in place</h2>
+    <p class="lede"><code>deploy.sh</code> installs the <code>edrf-xclient</code> Helm release. A rerun upgrades it in place, so the same command handles a fresh install and an upgrade.</p>
+    <div class="cluster">
+      <div><span class="k">DaemonSet</span><code>edrf-xclient-container-security</code><p>One pod per worker node, with host PID and host network.</p></div>
+      <div><span class="k">Secret, you create it</span><code>epo-coninfo</code><p>Mounted read-only at <span class="mono">/var/McAfee/agent/coninfo.xml</span>.</p></div>
+      <div><span class="k">Security context constraint</span><code>edrf-xclient-&lt;namespace&gt;</code><p>Not privileged. Drops all capabilities, then adds back only the ones the agent needs.</p></div>
+      <div><span class="k">ServiceAccount</span><code>edrf-admin</code><p>The identity the agent pods run as.</p></div>
+      <div><span class="k">ClusterRole + RoleBinding</span><code>edrf-xclient-use-scc-&lt;namespace&gt;</code><p>Lets the service account use the SCC.</p></div>
+      <div><span class="k">Pull secret, you create it</span><code>artifactory-pull-secret</code><p>Lets nodes pull the image from Artifactory.</p></div>
+      <div><span class="k">Host path</span><code>/mnt/XClientLogs</code><p>Agent data survives pod restarts and upgrades.</p></div>
+      <div><span class="k">Grace period</span><code>480 s</code><p>Old pods take up to 8 minutes each to stop, so an upgrade rollout can take 20 to 25 minutes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="traps" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow">Hard-won lessons</span>
+    <h2>Three mistakes the skill catches before you make them</h2>
+    <div class="traps">
+      <div class="trap"><span class="sym">InvalidImageName</span><h3>A placeholder digest</h3><p>A literal <code>&lt;digest&gt;</code> passes the dry-run, then every pod fails. Check the rendered <code>image:</code> line ends in a real 64-character digest.</p></div>
+      <div class="trap"><span class="sym">'.' is not recognized as an internal or external command</span><h3><code>./deploy.sh</code> typed into cmd</h3><p>On Windows, run the scripts through <code>"C:\Program Files\Git\bin\bash.exe"</code> from the same window, on one line. Plain <code>bash</code> usually means WSL, which can't see your Windows <code>oc</code> or <code>helm</code>.</p></div>
+      <div class="trap"><span class="sym">401 Unauthorized</span><h3>Token ID instead of Reference Token</h3><p>Artifactory shows both. Only the long Reference Token works as the pull secret password.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="skill" style="border-top:1px solid var(--line)">
+  <div class="wrap skill">
+    <div>
+      <span class="eyebrow">Built by Team Lumos</span>
+      <h2>Ask Claude instead of reading the whole guide</h2>
+      <p class="lede">The <code>edrf-xclient-deploy</code> skill packs the full deployment guide into Claude Code. It asks whether you're on Windows or Linux and which mode you're using, then gives the steps in the right order. It includes tool installs for first-timers and recognises the documented failure modes.</p>
+      <div class="repo">
+        <a class="repo-link" href="https://github.com/harshongh4t/edrf-xclient-deploy/blob/main/.claude/skills/edrf-xclient-deploy/SKILL.md" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+          <span><b>SKILL.md on GitHub</b><small>github.com/harshongh4t/edrf-xclient-deploy/.../SKILL.md</small></span>
+        </a>
+        <div class="clone"><code id="clone-cmd">git clone https://github.com/harshongh4t/edrf-xclient-deploy.git</code><button type="button" class="copy" id="copy">Copy</button></div>
+      </div>
+    </div>
+    <div class="chat" aria-label="Example conversation with the skill">
+      <div class="bub me"><span class="who">You</span><code>/edrf-xclient-deploy</code> First time deploying. Windows jumpbox, registry mode, build 150.</div>
+      <div class="bub ai"><span class="who">Claude</span>Here's the order. Each step has a check so you know it worked before moving on.
+        <ol>
+          <li>Install <code>oc</code>, <code>helm</code> 3 and Git for Windows</li>
+          <li>Log in with a token or a kubeconfig, then check your permissions</li>
+          <li>Extract the bundle and create the namespace</li>
+          <li>Generate the ePO SmartInstaller URL and download the Linux installer</li>
+          <li>Run <code>extract-coninfo.sh</code> through Git Bash, then apply <code>epo-coninfo.yml</code></li>
+          <li>Create the pull secret, dry-run, then run <code>deploy.sh</code></li>
+        </ol>
+      </div>
+      <div class="bub me"><span class="who">You</span>All my pods show <code>InvalidImageName</code>.</div>
+      <div class="bub ai"><span class="who">Claude</span>The digest is almost certainly still a placeholder. Rerun the dry-run with <code>| findstr "image:"</code> and check it ends in <code>sha256:</code> followed by 64 hex characters.</div>
+    </div>
+  </div>
+</section>
+
+<section id="video" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow">The recording</span>
+    <h2>See it run on a real cluster</h2>
+    <a class="screen" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+      <span class="inner">
+        <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+        <span class="vt">Watch the Team Lumos demo</span>
+        <small>Opens on Google Drive</small>
+      </span>
+    </a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="sig">Team Lumos</span>
+    <span>Trellix eDRF XClient container security on OpenShift · reference build RTQA 50.99.0.150</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- hero light motes ---------- */
+  var cv = document.getElementById('motes'), ctx = cv.getContext('2d'), motes = [], W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function size(){ var r = cv.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  function seed(){ motes = []; var n = Math.round(Math.min(90, W/14)); for (var i=0;i<n;i++) motes.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.8+.4, v:Math.random()*.25+.05, p:Math.random()*6.28, warm:Math.random()>.25}); }
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    for (var i=0;i<motes.length;i++){ var m = motes[i];
+      if (!reduce){ m.y -= m.v; m.x += Math.sin(t/2400 + m.p)*.12; if (m.y < -10){ m.y = H+10; m.x = Math.random()*W; } }
+      var a = .35 + .45*Math.abs(Math.sin(t/1400 + m.p));
+      ctx.beginPath(); ctx.fillStyle = m.warm ? 'rgba(255,210,122,'+a+')' : 'rgba(134,220,255,'+(a*.8)+')';
+      ctx.shadowColor = m.warm ? '#ffd27a' : '#86dcff'; ctx.shadowBlur = 8; ctx.arc(m.x,m.y,m.r,0,6.283); ctx.fill(); }
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  size(); seed(); requestAnimationFrame(draw);
+  window.addEventListener('resize', function(){ size(); seed(); if (reduce) draw(0); });
+  var spell = document.getElementById('spell');
+  spell.addEventListener('animationend', function(){ spell.classList.add('spell-done'); });
+
+  /* ---------- walkthrough data ---------- */
+  var BASH = '"C:\\Program Files\\Git\\bin\\bash.exe"';
+  var STEPS = [
+    { t:'Prepare the jumpbox', w:'Jumpbox',
+      why:'Install oc and Helm 3, plus Git for Windows on a Windows jumpbox. Log in with a token or a kubeconfig, then confirm you are allowed to create SCCs, role bindings and secrets.',
+      tip:'Every permission check must print yes. The "not namespace scoped" warning on the SCC check is normal.',
+      linux:[ {c:'oc version --client'},{o:'Client Version: 4.x'},{c:'helm version --short'},{o:'v3.x'},
+        {c:'oc login --token=<token> --server=https://api.<cluster-domain>:6443'},{ok:'Logged into "https://api.<cluster-domain>:6443" as "<user>"'},
+        {c:'oc auth can-i create securitycontextconstraints'},{w:'Warning: resource \'securitycontextconstraints\' is not namespace scoped'},{ok:'yes'},
+        {c:'oc auth can-i create secrets -n <namespace>'},{ok:'yes'} ],
+      win:[ {c:'oc version --client'},{o:'Client Version: 4.x'},{c:'helm version --short'},{o:'v3.x'},
+        {c:BASH+' --version'},{o:'GNU bash, version 5.x (x86_64-pc-msys)'},
+        {c:'set KUBECONFIG=C:\\Users\\<you>\\.kube\\<cluster>.kubeconfig'},{cm:'REM or: oc login --token=<token> --server=https://api.<cluster-domain>:6443'},
+        {c:'oc auth can-i create securitycontextconstraints'},{w:'Warning: resource \'securitycontextconstraints\' is not namespace scoped'},{ok:'yes'} ] },
+    { t:'Unpack the bundle', w:'Jumpbox',
+      why:'The bundle carries the image, the Helm chart and two scripts. Extract it into a fresh folder; every later command runs from the folder that contains deploy.sh.',
+      tip:'If tar creates an edrf-xclient-bundle-<version> subfolder, cd into it first.',
+      linux:[ {c:'mkdir -p ~/edrf-deploy/bundle-<version> && cd ~/edrf-deploy/bundle-<version>'},
+        {c:'tar -xzf edrf-xclient-bundle-<version>.tar.gz'},{c:'ls'},{ok:'deploy.sh  edrf-xclient/  extract-coninfo.sh  image.tar'} ],
+      win:[ {c:'mkdir C:\\edrf-deploy\\bundle-<version> && cd /d C:\\edrf-deploy\\bundle-<version>'},
+        {c:'tar -xzf edrf-xclient-bundle-<version>.tar.gz'},{c:'dir /b'},{ok:'deploy.sh'},{ok:'edrf-xclient'},{ok:'extract-coninfo.sh'},{ok:'image.tar'} ] },
+    { t:'Create the SmartInstaller in ePO', w:'ePO on-prem console',
+      why:'The agent learns which ePO server to report to from coninfo.xml, which ships inside the Linux SmartInstaller. Generate a client-side download URL in ePO and download TrellixSmartInstall.sh from it.',
+      tip:'Choose the Non-Windows (Linux) agent. Copy the file as-is and never open it in an editor; its binary payload breaks easily.',
+      ui:[ {cm:'# in the ePO on-prem console'},{u:'Menu  >  Systems  >  System Tree'},{u:'New Systems'},{u:'Create URL for client-side agent download'},
+        {u:'URL name ............ edrf-xclient-<cluster_name>'},{u:'Agent version ....... Non-Windows (Linux)'},{u:'Agent Handlers ...... All Agent Handlers'},
+        {u:'OK'},{ok:'Agent Deployment URL created'},{u:'Open the URL  >  download TrellixSmartInstall.sh'},{cm:''} ],
+      linux:[ {c:'ls -la TrellixSmartInstall.sh'},{o:'-rw-r--r--. 1 <user> <user> 7340032 TrellixSmartInstall.sh'} ],
+      win:[ {c:'dir TrellixSmartInstall.sh'},{o:'          7,340,032 TrellixSmartInstall.sh'} ] },
+    { t:'Build the epo-coninfo secret', w:'Jumpbox → cluster',
+      why:'extract-coninfo.sh pulls coninfo.xml out of the SmartInstaller and writes a Secret manifest. Applying it gives the cluster the ePO connection details that used to be passed as flags.',
+      tip:'deploy.sh refuses to run if this secret is missing. Delete epo-coninfo.yml from the jumpbox once it is applied.',
+      linux:[ {c:'bash extract-coninfo.sh TrellixSmartInstall.sh <namespace>'},
+        {o:'[1/5] Reading SmartInstaller: TrellixSmartInstall.sh'},{o:'[2/5] Checking available disk space...'},{o:'[3/5] Locating archive marker...'},{o:'[4/5] Extracting coninfo.xml...'},{o:'[5/5] Generating epo-coninfo.yml...'},
+        {ok:'Done.'},{ok:'  Output file : epo-coninfo.yml'},
+        {c:'oc apply -f epo-coninfo.yml'},{ok:'secret/epo-coninfo created'},
+        {c:'oc get secret epo-coninfo -n <namespace>'},{o:'NAME          TYPE     DATA   AGE'},{ok:'epo-coninfo   Opaque   1      6s'} ],
+      win:[ {c:BASH+' extract-coninfo.sh TrellixSmartInstall.sh <namespace>'},
+        {o:'[1/5] Reading SmartInstaller: TrellixSmartInstall.sh'},{o:'[2/5] Checking available disk space...'},{o:'[3/5] Locating archive marker...'},{o:'[4/5] Extracting coninfo.xml...'},{o:'[5/5] Generating epo-coninfo.yml...'},
+        {ok:'Done.'},{ok:'  Output file : epo-coninfo.yml'},
+        {c:'oc apply -f epo-coninfo.yml'},{ok:'secret/epo-coninfo created'} ] },
+    { t:'Create the pull secret', w:'Cluster',
+      why:'Worker nodes need their own copy of your Artifactory credentials to pull the private image. Create it once per namespace; on an upgrade it usually already exists.',
+      tip:'Use the Reference Token as the password, not the Token ID. Pass only the secret name to deploy.sh, never the token.',
+      linux:[ {c:'oc create secret docker-registry artifactory-pull-secret --docker-server=artifactory.trellix.com --docker-username=<artifactory_user> --docker-password=<reference_token> -n <namespace>'},
+        {ok:'secret/artifactory-pull-secret created'},{c:'oc get secret artifactory-pull-secret -n <namespace>'},{o:'NAME                      TYPE                             DATA   AGE'},{ok:'artifactory-pull-secret   kubernetes.io/dockerconfigjson   1      4s'} ],
+      win:[ {c:'oc create secret docker-registry artifactory-pull-secret --docker-server=artifactory.trellix.com --docker-username=<artifactory_user> --docker-password=<reference_token> -n <namespace>'},
+        {ok:'secret/artifactory-pull-secret created'},{cm:'REM token has & | ^ or ! in it? run this one from PowerShell instead'} ] },
+    { t:'Dry-run the chart', w:'Jumpbox',
+      why:'Render the chart without touching the cluster, then look only at the image line. It must end in the real digest for your build from Artifactory.',
+      tip:'A placeholder digest passes the dry-run but makes every pod fail with InvalidImageName.',
+      linux:[ {c:'echo "$DIGEST" | grep -Eq \'^sha256:[0-9a-f]{64}$\' && echo "Digest OK"'},{ok:'Digest OK'},
+        {c:'helm upgrade --install edrf-xclient ./edrf-xclient -n <namespace> --set image.repository=<image_repo> --set image.digest=$DIGEST --set imagePullSecret=artifactory-pull-secret --set deploymentDetails.clusterName=<cluster_name> --dry-run=client | grep "image:"'},
+        {ok:'          image: <image_repo>@sha256:<64 hex characters>'} ],
+      win:[ {c:'helm upgrade --install edrf-xclient ./edrf-xclient -n <namespace> --set image.repository=<image_repo> --set image.digest=sha256:<digest> --set imagePullSecret=artifactory-pull-secret --set deploymentDetails.clusterName=<cluster_name> --dry-run=client | findstr "image:"'},
+        {ok:'          image: <image_repo>@sha256:<64 hex characters>'} ] },
+    { t:'Run deploy.sh', w:'Jumpbox → cluster',
+      why:'deploy.sh checks for the epo-coninfo secret, then runs helm upgrade --install for you. The same command installs on the first run and upgrades on every run after that.',
+      tip:'Only six flags are accepted. The old --epo-* flags now fail with "Unknown option".',
+      linux:[ {c:'chmod +x deploy.sh'},
+        {c:'./deploy.sh --namespace <namespace> --cluster-name <cluster_name> --image-repo <image_repo> --image-digest sha256:<digest> --image-pull-secret artifactory-pull-secret'},
+        {o:'==> Mode: registry (image: <image_repo>@sha256:<digest>)'},{o:'==> Installing Helm chart'},{o:'Release "edrf-xclient" has been upgraded. Happy Helming!'},
+        {o:'NAME: edrf-xclient'},{o:'NAMESPACE: <namespace>'},{ok:'STATUS: deployed'},{o:'REVISION: <n>'},{ok:'==> Deployment complete. Check pod status:'},{o:'    oc get pods -n <namespace>'} ],
+      win:[ {c:BASH+' ./deploy.sh --namespace <namespace> --cluster-name <cluster_name> --image-repo <image_repo> --image-digest sha256:<digest> --image-pull-secret artifactory-pull-secret'},
+        {o:'==> Mode: registry (image: <image_repo>@sha256:<digest>)'},{o:'==> Installing Helm chart'},{o:'Release "edrf-xclient" has been upgraded. Happy Helming!'},
+        {o:'NAME: edrf-xclient'},{o:'NAMESPACE: <namespace>'},{ok:'STATUS: deployed'},{o:'REVISION: <n>'},{ok:'==> Deployment complete. Check pod status:'},{o:'    oc get pods -n <namespace>'} ] },
+    { t:'Verify the agents', w:'Cluster → ePO',
+      why:'Wait for the rollout, check that every worker has a Running pod, and confirm coninfo.xml reached the pod. Then look for the nodes in the ePO console.',
+      tip:'An upgrade rollout can take 20 to 25 minutes, because each old pod gets up to 8 minutes to stop. Recheck restarts after about an hour.',
+      linux:[ {c:'oc rollout status ds/edrf-xclient-container-security -n <namespace>'},{ok:'daemon set "edrf-xclient-container-security" successfully rolled out'},
+        {c:'oc get pods -n <namespace>'},{o:'NAME                                    READY   STATUS    RESTARTS   AGE'},
+        {ok:'edrf-xclient-container-security-7xk2p   1/1     Running   0          6m'},{ok:'edrf-xclient-container-security-b9qfd   1/1     Running   0          6m'},{ok:'edrf-xclient-container-security-m4tzw   1/1     Running   0          6m'},
+        {c:'POD=$(oc get pods -n <namespace> -l name=edrf-xclient-container-security -o jsonpath=\'{.items[0].metadata.name}\')'},
+        {c:'oc exec -n <namespace> $POD -- ls -l /var/McAfee/agent/coninfo.xml'},{ok:'-rw-r--r--. 1 root root 4210 coninfo.xml'} ],
+      win:[ {c:'oc rollout status ds/edrf-xclient-container-security -n <namespace>'},{ok:'daemon set "edrf-xclient-container-security" successfully rolled out'},
+        {c:'oc get pods -n <namespace>'},{o:'NAME                                    READY   STATUS    RESTARTS   AGE'},
+        {ok:'edrf-xclient-container-security-7xk2p   1/1     Running   0          6m'},{ok:'edrf-xclient-container-security-b9qfd   1/1     Running   0          6m'},{ok:'edrf-xclient-container-security-m4tzw   1/1     Running   0          6m'},
+        {c:'oc exec -n <namespace> <pod_name> -- ls -l /var/McAfee/agent/coninfo.xml'},{ok:'-rw-r--r--. 1 root root 4210 coninfo.xml'} ] }
+  ];
+
+  /* ---------- walkthrough rendering ---------- */
+  var os = 'linux', cur = 0, playing = false, timer = null, runId = 0;
+  var stepsEl = document.getElementById('steps'), beam = document.getElementById('beam'), term = document.getElementById('term');
+  STEPS.forEach(function(s, i){
+    var li = document.createElement('li');
+    li.innerHTML = '<button type="button" class="step-btn" data-i="'+i+'"><span class="dot">'+String(i+1).padStart(2,'0')+'</span><span><span class="t"></span><span class="w"></span></span></button>';
+    li.querySelector('.t').textContent = s.t; li.querySelector('.w').textContent = s.w;
+    stepsEl.appendChild(li);
+  });
+  var btns = stepsEl.querySelectorAll('.step-btn');
+  btns.forEach(function(b){ b.addEventListener('click', function(){ stop(); show(+b.dataset.i, false); }); });
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function lines(s){ return (s.ui || []).concat(s[os]); }
+  function lineHTML(l, partial){
+    if (l.c !== undefined){ var txt = partial !== undefined ? l.c.slice(0, partial) : l.c;
+      return (os === 'win' ? '<span class="p">C:\\edrf-deploy&gt; </span>' : '<span class="p">$ </span>') + '<span class="c">'+esc(txt)+'</span>'; }
+    if (l.u !== undefined) return '<span class="ui">&#9656; '+esc(l.u)+'</span>';
+    if (l.ok !== undefined) return '<span class="ok">'+esc(l.ok)+'</span>';
+    if (l.w !== undefined) return '<span class="w">'+esc(l.w)+'</span>';
+    if (l.cm !== undefined) return '<span class="cm">'+esc(l.cm)+'</span>';
+    return esc(l.o);
+  }
+  function renderAll(){ term.innerHTML = lines(STEPS[cur]).map(function(l){ return lineHTML(l); }).join('\n') + '\n' + (os==='win'?'<span class="p">C:\\edrf-deploy&gt; </span>':'<span class="p">$ </span>') + '<span class="caret"></span>'; }
+
+  function show(i, animate){
+    cur = i; var s = STEPS[i];
+    btns.forEach(function(b, j){ b.classList.toggle('on', j === i); b.classList.toggle('lit', j < i); b.setAttribute('aria-current', j === i ? 'step' : 'false'); });
+    var target = btns[i].querySelector('.dot'), base = btns[0].querySelector('.dot');
+    beam.style.height = (target.getBoundingClientRect().top - base.getBoundingClientRect().top) + 'px';
+    document.getElementById('s-where').textContent = s.w;
+    document.getElementById('s-title').textContent = s.t;
+    document.getElementById('s-why').textContent = s.why;
+    document.getElementById('s-tip').textContent = s.tip;
+    document.getElementById('t-title').textContent = s.ui ? 'ePO console, then ' + (os === 'win' ? 'cmd.exe' : 'bash') : (os === 'win' ? 'cmd.exe' : 'bash') + ' · jumpbox';
+    document.getElementById('t-count').textContent = 'Step ' + (i+1) + ' of ' + STEPS.length;
+    document.getElementById('prev').disabled = i === 0;
+    document.getElementById('next').textContent = i === STEPS.length - 1 ? 'Start over' : 'Next step';
+    if (animate && !reduce) type(); else renderAll();
+  }
+
+  function type(){
+    var my = ++runId, ls = lines(STEPS[cur]), done = [], li = 0, ci = 0;
+    function paint(extra){ term.innerHTML = done.join('\n') + (done.length ? '\n' : '') + extra; term.scrollTop = term.scrollHeight; }
+    function tick(){
+      if (my !== runId) return;
+      if (li >= ls.length){ renderAll(); if (playing) timer = setTimeout(function(){ if (my !== runId) return; if (cur < STEPS.length - 1) show(cur + 1, true); else stop(); }, 1900); return; }
+      var l = ls[li];
+      if (l.c !== undefined){
+        ci = Math.min(l.c.length, ci + (l.c.length > 90 ? 4 : 2));
+        paint(lineHTML(l, ci) + '<span class="caret"></span>');
+        if (ci >= l.c.length){ done.push(lineHTML(l)); li++; ci = 0; timer = setTimeout(tick, 380); }
+        else timer = setTimeout(tick, 18);
+      } else { done.push(lineHTML(l)); li++; paint(''); timer = setTimeout(tick, l.u !== undefined ? 260 : 90); }
+    }
+    tick();
+  }
+
+  var playBtn = document.getElementById('play');
+  function stop(){ playing = false; runId++; clearTimeout(timer); playBtn.querySelector('span').textContent = 'Play the demo'; }
+  playBtn.addEventListener('click', function(){
+    if (playing){ stop(); renderAll(); return; }
+    playing = true; playBtn.querySelector('span').textContent = 'Stop';
+    if (reduce){ var adv = function(){ if (!playing) return; if (cur < STEPS.length - 1){ show(cur + 1, false); timer = setTimeout(adv, 3500); } else stop(); }; show(0, false); timer = setTimeout(adv, 3500); }
+    else show(cur === STEPS.length - 1 ? 0 : cur, true);
+  });
+  document.getElementById('prev').addEventListener('click', function(){ stop(); if (cur > 0) show(cur - 1, false); });
+  document.getElementById('next').addEventListener('click', function(){ stop(); show(cur < STEPS.length - 1 ? cur + 1 : 0, !reduce); });
+
+  function setOS(v){ os = v; document.getElementById('os-linux').setAttribute('aria-pressed', v === 'linux'); document.getElementById('os-win').setAttribute('aria-pressed', v === 'win'); stop(); show(cur, false); }
+  document.getElementById('os-linux').addEventListener('click', function(){ setOS('linux'); });
+  document.getElementById('os-win').addEventListener('click', function(){ setOS('win'); });
+  window.addEventListener('resize', function(){ show(cur, false); });
+
+  document.getElementById('copy').addEventListener('click', function(e){
+    var t = document.getElementById('clone-cmd').textContent, b = e.currentTarget;
+    function sel(){ var r = document.createRange(); r.selectNodeContents(document.getElementById('clone-cmd')); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Press Ctrl+C'; }
+    try { navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1600); }, sel); } catch (err) { sel(); }
+  });
+
+  show(0, false);
+})();
+</script>
+</body>
+</html>
