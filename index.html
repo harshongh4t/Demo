@@ -157,16 +157,6 @@ code,.mono{font-family:var(--f-mono);font-size:.9em}
 .copy{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:.75rem;color:var(--lumen);padding:4px 8px;border:1px solid var(--line);border-radius:8px}
 .copy:focus-visible{outline:2px solid var(--lumen)}
 
-/* ---------- video ---------- */
-.screen{display:block;position:relative;margin-top:30px;border-radius:22px;overflow:hidden;border:1px solid var(--line);text-decoration:none;aspect-ratio:16/7;max-width:100%;
-  background:radial-gradient(60% 90% at 50% 110%,color-mix(in oklab,var(--lumen) 28%,transparent),transparent 70%),repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.018) 3px 4px),var(--night-2)}
-@media (max-width:600px){.screen{aspect-ratio:4/3}}
-.screen .inner{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:16px;text-align:center;padding:20px}
-.play{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:var(--lumen);color:#1b1407;box-shadow:0 0 0 12px color-mix(in oklab,var(--lumen) 16%,transparent),0 0 60px 10px color-mix(in oklab,var(--lumen) 40%,transparent);transition:transform .3s}
-.screen:hover .play{transform:scale(1.07)}
-.play svg{width:30px;height:30px;margin-left:5px}
-.screen .vt{font-family:var(--f-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:500}
-.screen small{color:var(--muted);font-family:var(--f-mono);font-size:.78rem}
 
 footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-area-inset-bottom, 0px))}
 .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.9rem}
@@ -315,19 +305,6 @@ oc apply -f epo-coninfo.yml
   </div>
 </section>
 
-<section id="video" style="padding-top:0">
-  <div class="wrap">
-    <span class="eyebrow">Demo recording</span>
-    <h2>Watch the full demo</h2>
-    <a class="screen" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
-      <span class="inner">
-        <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
-        <span class="vt">Watch the Team Lumos demo</span>
-        <small>Opens on Google Drive</small>
-      </span>
-    </a>
-  </div>
-</section>
 </main>
 
 
