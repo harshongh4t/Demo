@@ -168,14 +168,6 @@ code,.mono{font-family:var(--f-mono);font-size:.9em}
 .screen .vt{font-family:var(--f-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:500}
 .screen small{color:var(--muted);font-family:var(--f-mono);font-size:.78rem}
 
-.vmodal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(5,8,18,.88);backdrop-filter:blur(6px);
-  padding-block:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
-.vbox{width:min(1100px,100%);display:grid;gap:12px}
-.vbar{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--f-mono);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--lumen)}
-.vbar .btn{padding:8px 16px;font-size:.85rem;text-transform:none;letter-spacing:0}
-.vframe{aspect-ratio:16/9;max-width:100%;max-height:78vh;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000;box-shadow:0 0 80px -10px color-mix(in oklab,var(--lumen) 35%,transparent)}
-.vframe iframe{display:block;width:100%;height:100%;border:0}
-.vext{justify-self:center;color:var(--muted);font-size:.85rem}
 footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-area-inset-bottom, 0px))}
 .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.9rem}
 .foot .sig{font-family:var(--f-display);font-weight:800;font-size:1.6rem;letter-spacing:-.03em;color:var(--lumen)}
@@ -197,7 +189,7 @@ footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-
     </div>
     <div class="spell" id="spell" aria-hidden="true">Lumos</div>
     <div class="ctas">
-      <a class="btn primary" data-video href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+      <a class="btn primary" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Watch the recorded demo</a>
       <a class="btn" href="#walkthrough"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 17l6-6-6-6M12 19h8"/></svg>Step through the flow</a>
       <a class="btn" href="https://github.com/harshongh4t/edrf-xclient-deploy/blob/main/.claude/skills/edrf-xclient-deploy/SKILL.md" target="_blank" rel="noopener">
@@ -327,27 +319,17 @@ oc apply -f epo-coninfo.yml
   <div class="wrap">
     <span class="eyebrow">The recording</span>
     <h2>See it run on a real cluster</h2>
-    <a class="screen" data-video href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+    <a class="screen" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
       <span class="inner">
         <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
         <span class="vt">Watch the Team Lumos demo</span>
-        <small>Plays right here</small>
+        <small>Opens on Google Drive</small>
       </span>
     </a>
   </div>
 </section>
 </main>
 
-<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Team Lumos demo recording" hidden>
-  <div class="vbox">
-    <div class="vbar">
-      <span>Team Lumos · demo recording</span>
-      <button type="button" class="btn" id="vclose">Close</button>
-    </div>
-    <div class="vframe"><iframe id="vframe" title="Team Lumos demo recording" src="about:blank" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
-    <a class="vext" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">Video not loading? Open it on Google Drive</a>
-  </div>
-</div>
 
 <footer>
   <div class="wrap foot">
@@ -518,15 +500,6 @@ oc apply -f epo-coninfo.yml
 
   function stop(){ playing = false; runId++; clearTimeout(timer); }
 
-  /* ---------- video lightbox ---------- */
-  var VIDEO = 'https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/preview';
-  var vm = document.getElementById('vmodal'), vf = document.getElementById('vframe'), lastFocus = null;
-  function openVideo(e){ e.preventDefault(); lastFocus = document.activeElement; vf.src = VIDEO; vm.hidden = false; document.body.style.overflow = 'hidden'; document.getElementById('vclose').focus(); }
-  function closeVideo(){ vm.hidden = true; vf.src = 'about:blank'; document.body.style.overflow = ''; if (lastFocus) lastFocus.focus(); }
-  document.querySelectorAll('[data-video]').forEach(function(a){ a.addEventListener('click', openVideo); });
-  document.getElementById('vclose').addEventListener('click', closeVideo);
-  vm.addEventListener('click', function(e){ if (e.target === vm) closeVideo(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !vm.hidden) closeVideo(); });
   document.getElementById('prev').addEventListener('click', function(){ stop(); if (cur > 0) show(cur - 1, false); });
   document.getElementById('next').addEventListener('click', function(){ stop(); show(cur < STEPS.length - 1 ? cur + 1 : 0, !reduce); });
 
