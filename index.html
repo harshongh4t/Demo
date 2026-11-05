@@ -134,20 +134,6 @@ code,.mono{font-family:var(--f-mono);font-size:.9em}
 .nav{display:flex;gap:8px}
 .nav .btn{padding:9px 16px;font-size:.88rem}
 
-/* ---------- cluster ---------- */
-.cluster{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:1px;margin-top:30px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.cluster div{background:var(--night);padding:22px;min-width:0}
-.cluster .k{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.cluster code{display:block;color:var(--frost);margin:8px 0 6px;font-size:.92rem;word-break:break-all}
-.cluster p{color:var(--muted);font-size:.92rem}
-
-/* ---------- pitfalls ---------- */
-.traps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;margin-top:30px}
-.trap{border-top:2px solid var(--warn);padding-top:16px;min-width:0}
-.trap .sym{font-family:var(--f-mono);font-size:.84rem;color:var(--warn);word-break:break-word}
-.trap h3{margin-top:10px}
-.trap p{color:var(--muted);margin-top:8px;font-size:.95rem}
-
 /* ---------- skill ---------- */
 .skill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center}
 @media (max-width:900px){.skill{grid-template-columns:minmax(0,1fr)}}
@@ -182,6 +168,14 @@ code,.mono{font-family:var(--f-mono);font-size:.9em}
 .screen .vt{font-family:var(--f-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:500}
 .screen small{color:var(--muted);font-family:var(--f-mono);font-size:.78rem}
 
+.vmodal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(5,8,18,.88);backdrop-filter:blur(6px);
+  padding-block:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.vbox{width:min(1100px,100%);display:grid;gap:12px}
+.vbar{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--f-mono);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--lumen)}
+.vbar .btn{padding:8px 16px;font-size:.85rem;text-transform:none;letter-spacing:0}
+.vframe{aspect-ratio:16/9;max-width:100%;max-height:78vh;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000;box-shadow:0 0 80px -10px color-mix(in oklab,var(--lumen) 35%,transparent)}
+.vframe iframe{display:block;width:100%;height:100%;border:0}
+.vext{justify-self:center;color:var(--muted);font-size:.85rem}
 footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-area-inset-bottom, 0px))}
 .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.9rem}
 .foot .sig{font-family:var(--f-display);font-weight:800;font-size:1.6rem;letter-spacing:-.03em;color:var(--lumen)}
@@ -202,10 +196,8 @@ footer{border-top:1px solid var(--line);padding-block:40px calc(40px + env(safe-
       <span class="build">Demo recorded on RTQA build 50.99.0.150</span>
     </div>
     <div class="spell" id="spell" aria-hidden="true">Lumos</div>
-    <h1>Lighting up <b>Trellix eDRF XClient</b> on every OpenShift node.</h1>
-    <p class="lede">One bundle, one secret, one script. This is the deployment flow from an empty jumpbox to a container-security agent running on each worker node and reporting to ePO, plus the Claude Code skill that walks first-timers through it.</p>
     <div class="ctas">
-      <a class="btn primary" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+      <a class="btn primary" data-video href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Watch the recorded demo</a>
       <a class="btn" href="#walkthrough"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 17l6-6-6-6M12 19h8"/></svg>Step through the flow</a>
       <a class="btn" href="https://github.com/harshongh4t/edrf-xclient-deploy/blob/main/.claude/skills/edrf-xclient-deploy/SKILL.md" target="_blank" rel="noopener">
@@ -264,14 +256,13 @@ oc apply -f epo-coninfo.yml
       <div>
         <span class="eyebrow">Live walkthrough</span>
         <h2>Eight steps, in the order you run them</h2>
-        <p class="lede">Pick a step, or press Play to run the demo end to end. Values in <code>&lt;angle brackets&gt;</code> are placeholders; pod names and sizes are examples.</p>
+        <p class="lede">Values in <code>&lt;angle brackets&gt;</code> are placeholders; pod names and sizes are examples.</p>
       </div>
       <div class="controls">
         <div class="seg" role="group" aria-label="Jumpbox operating system">
           <button type="button" id="os-linux" aria-pressed="true">Linux</button>
           <button type="button" id="os-win" aria-pressed="false">Windows cmd</button>
         </div>
-        <button type="button" class="btn primary" id="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Play the demo</span></button>
       </div>
     </div>
 
@@ -300,42 +291,12 @@ oc apply -f epo-coninfo.yml
   </div>
 </section>
 
-<section id="cluster">
-  <div class="wrap">
-    <span class="eyebrow">What lands on the cluster</span>
-    <h2>Everything one script puts in place</h2>
-    <p class="lede"><code>deploy.sh</code> installs the <code>edrf-xclient</code> Helm release. A rerun upgrades it in place, so the same command handles a fresh install and an upgrade.</p>
-    <div class="cluster">
-      <div><span class="k">DaemonSet</span><code>edrf-xclient-container-security</code><p>One pod per worker node, with host PID and host network.</p></div>
-      <div><span class="k">Secret, you create it</span><code>epo-coninfo</code><p>Mounted read-only at <span class="mono">/var/McAfee/agent/coninfo.xml</span>.</p></div>
-      <div><span class="k">Security context constraint</span><code>edrf-xclient-&lt;namespace&gt;</code><p>Not privileged. Drops all capabilities, then adds back only the ones the agent needs.</p></div>
-      <div><span class="k">ServiceAccount</span><code>edrf-admin</code><p>The identity the agent pods run as.</p></div>
-      <div><span class="k">ClusterRole + RoleBinding</span><code>edrf-xclient-use-scc-&lt;namespace&gt;</code><p>Lets the service account use the SCC.</p></div>
-      <div><span class="k">Pull secret, you create it</span><code>artifactory-pull-secret</code><p>Lets nodes pull the image from Artifactory.</p></div>
-      <div><span class="k">Host path</span><code>/mnt/XClientLogs</code><p>Agent data survives pod restarts and upgrades.</p></div>
-      <div><span class="k">Grace period</span><code>480 s</code><p>Old pods take up to 8 minutes each to stop, so an upgrade rollout can take 20 to 25 minutes.</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="traps" style="padding-top:0">
-  <div class="wrap">
-    <span class="eyebrow">Hard-won lessons</span>
-    <h2>Three mistakes the skill catches before you make them</h2>
-    <div class="traps">
-      <div class="trap"><span class="sym">InvalidImageName</span><h3>A placeholder digest</h3><p>A literal <code>&lt;digest&gt;</code> passes the dry-run, then every pod fails. Check the rendered <code>image:</code> line ends in a real 64-character digest.</p></div>
-      <div class="trap"><span class="sym">'.' is not recognized as an internal or external command</span><h3><code>./deploy.sh</code> typed into cmd</h3><p>On Windows, run the scripts through <code>"C:\Program Files\Git\bin\bash.exe"</code> from the same window, on one line. Plain <code>bash</code> usually means WSL, which can't see your Windows <code>oc</code> or <code>helm</code>.</p></div>
-      <div class="trap"><span class="sym">401 Unauthorized</span><h3>Token ID instead of Reference Token</h3><p>Artifactory shows both. Only the long Reference Token works as the pull secret password.</p></div>
-    </div>
-  </div>
-</section>
-
 <section id="skill" style="border-top:1px solid var(--line)">
   <div class="wrap skill">
     <div>
       <span class="eyebrow">Built by Team Lumos</span>
-      <h2>Ask Claude instead of reading the whole guide</h2>
-      <p class="lede">The <code>edrf-xclient-deploy</code> skill packs the full deployment guide into Claude Code. It asks whether you're on Windows or Linux and which mode you're using, then gives the steps in the right order. It includes tool installs for first-timers and recognises the documented failure modes.</p>
+      <h2>A deployment assistant for Claude and Gemini Enterprise</h2>
+      <p class="lede">We turned the deployment guide into a reusable AI skill, <code>edrf-xclient-deploy</code>. Load it in Claude or Gemini Enterprise and anyone, including a first-timer, can deploy eDRF XClient by asking. It checks the jumpbox OS and deployment mode, gives each command in order with a way to confirm it worked, and diagnoses known errors.</p>
       <div class="repo">
         <a class="repo-link" href="https://github.com/harshongh4t/edrf-xclient-deploy/blob/main/.claude/skills/edrf-xclient-deploy/SKILL.md" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
@@ -346,7 +307,7 @@ oc apply -f epo-coninfo.yml
     </div>
     <div class="chat" aria-label="Example conversation with the skill">
       <div class="bub me"><span class="who">You</span><code>/edrf-xclient-deploy</code> First time deploying. Windows jumpbox, registry mode, build 150.</div>
-      <div class="bub ai"><span class="who">Claude</span>Here's the order. Each step has a check so you know it worked before moving on.
+      <div class="bub ai"><span class="who">Assistant</span>Here's the order. Each step has a check so you know it worked before moving on.
         <ol>
           <li>Install <code>oc</code>, <code>helm</code> 3 and Git for Windows</li>
           <li>Log in with a token or a kubeconfig, then check your permissions</li>
@@ -357,7 +318,7 @@ oc apply -f epo-coninfo.yml
         </ol>
       </div>
       <div class="bub me"><span class="who">You</span>All my pods show <code>InvalidImageName</code>.</div>
-      <div class="bub ai"><span class="who">Claude</span>The digest is almost certainly still a placeholder. Rerun the dry-run with <code>| findstr "image:"</code> and check it ends in <code>sha256:</code> followed by 64 hex characters.</div>
+      <div class="bub ai"><span class="who">Assistant</span>The digest is almost certainly still a placeholder. Rerun the dry-run with <code>| findstr "image:"</code> and check it ends in <code>sha256:</code> followed by 64 hex characters.</div>
     </div>
   </div>
 </section>
@@ -366,16 +327,27 @@ oc apply -f epo-coninfo.yml
   <div class="wrap">
     <span class="eyebrow">The recording</span>
     <h2>See it run on a real cluster</h2>
-    <a class="screen" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
+    <a class="screen" data-video href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">
       <span class="inner">
         <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
         <span class="vt">Watch the Team Lumos demo</span>
-        <small>Opens on Google Drive</small>
+        <small>Plays right here</small>
       </span>
     </a>
   </div>
 </section>
 </main>
+
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Team Lumos demo recording" hidden>
+  <div class="vbox">
+    <div class="vbar">
+      <span>Team Lumos · demo recording</span>
+      <button type="button" class="btn" id="vclose">Close</button>
+    </div>
+    <div class="vframe"><iframe id="vframe" title="Team Lumos demo recording" src="about:blank" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+    <a class="vext" href="https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/view?usp=sharing" target="_blank" rel="noopener">Video not loading? Open it on Google Drive</a>
+  </div>
+</div>
 
 <footer>
   <div class="wrap foot">
@@ -544,14 +516,17 @@ oc apply -f epo-coninfo.yml
     tick();
   }
 
-  var playBtn = document.getElementById('play');
-  function stop(){ playing = false; runId++; clearTimeout(timer); playBtn.querySelector('span').textContent = 'Play the demo'; }
-  playBtn.addEventListener('click', function(){
-    if (playing){ stop(); renderAll(); return; }
-    playing = true; playBtn.querySelector('span').textContent = 'Stop';
-    if (reduce){ var adv = function(){ if (!playing) return; if (cur < STEPS.length - 1){ show(cur + 1, false); timer = setTimeout(adv, 3500); } else stop(); }; show(0, false); timer = setTimeout(adv, 3500); }
-    else show(cur === STEPS.length - 1 ? 0 : cur, true);
-  });
+  function stop(){ playing = false; runId++; clearTimeout(timer); }
+
+  /* ---------- video lightbox ---------- */
+  var VIDEO = 'https://drive.google.com/file/d/121daQlNQBE2JwkSGARbbNcwPXjlPwOM5/preview';
+  var vm = document.getElementById('vmodal'), vf = document.getElementById('vframe'), lastFocus = null;
+  function openVideo(e){ e.preventDefault(); lastFocus = document.activeElement; vf.src = VIDEO; vm.hidden = false; document.body.style.overflow = 'hidden'; document.getElementById('vclose').focus(); }
+  function closeVideo(){ vm.hidden = true; vf.src = 'about:blank'; document.body.style.overflow = ''; if (lastFocus) lastFocus.focus(); }
+  document.querySelectorAll('[data-video]').forEach(function(a){ a.addEventListener('click', openVideo); });
+  document.getElementById('vclose').addEventListener('click', closeVideo);
+  vm.addEventListener('click', function(e){ if (e.target === vm) closeVideo(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !vm.hidden) closeVideo(); });
   document.getElementById('prev').addEventListener('click', function(){ stop(); if (cur > 0) show(cur - 1, false); });
   document.getElementById('next').addEventListener('click', function(){ stop(); show(cur < STEPS.length - 1 ? cur + 1 : 0, !reduce); });
 
